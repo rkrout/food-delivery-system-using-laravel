@@ -1,5 +1,5 @@
 
-
+@include('admin.base')
 <table style="border-collapse: separate">
     <thead>
         <tr>

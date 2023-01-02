@@ -1,4 +1,4 @@
-
+@include('admin.base')
 <a href="{{ route('admin.categories.create') }}">create</a> 
 <table style="border-collapse: separate">
     <thead>

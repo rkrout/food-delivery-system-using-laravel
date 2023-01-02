@@ -1,5 +1,5 @@
 
-
+@include('admin.base')
 <form action="{{ route('admin.delivery-agents.store') }}" method="post" enctype="multipart/form-data">
     @csrf
 

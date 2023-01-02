@@ -1,5 +1,5 @@
 
-
+@include('admin.base')
 <form action="{{ route('admin.settings.update') }}" method="post">
     @csrf
 

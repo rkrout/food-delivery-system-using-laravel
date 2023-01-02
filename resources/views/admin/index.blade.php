@@ -1,3 +1,4 @@
+@include('admin.base')
 {{ $total_foods }}
 {{ $total_categories }}
 {{ $total_sliders }}

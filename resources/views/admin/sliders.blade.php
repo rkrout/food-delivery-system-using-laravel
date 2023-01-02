@@ -1,4 +1,4 @@
-
+@include('admin.base')
 <a href="{{ route('admin.sliders.create') }}">create</a> 
 <table style="border-collapse: separate">
     <thead>

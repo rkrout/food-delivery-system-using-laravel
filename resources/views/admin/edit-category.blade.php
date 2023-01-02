@@ -1,5 +1,5 @@
 
-
+@include('admin.base')
 <form action="{{ route('admin.categories.update', ['category' => $category->id]) }}" method="post" enctype="multipart/form-data">
     @csrf
 

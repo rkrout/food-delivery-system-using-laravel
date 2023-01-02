@@ -1,4 +1,5 @@
 
+@include('admin.base')
 <a href="{{ route('admin.delivery-agents.create') }}">create</a> 
 <table style="border-collapse: separate">
     <thead>

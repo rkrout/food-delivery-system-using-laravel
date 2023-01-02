@@ -1,5 +1,5 @@
 
-
+@include('admin.base')
 <form action="{{ route('admin.foods.update', ['food' => $food->id]) }}" method="post" enctype="multipart/form-data">
     @csrf
 
