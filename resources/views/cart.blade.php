@@ -1,227 +1,178 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@include('base')
 
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>Laravel</title>
+<h1>cart page</h1>
+
+@foreach ($foods as $food)
+    <div class="food">
+        <p class="food-id" style="display: none">{{ $food->id }}</p>
+        <div class="qty">
+            <button class="qty-minus">-</button>
+            <p class="qty-count">{{ $food->qty }}</p>
+            <button class="qty-plus">+</button>
+        </div>
+        <img src="{{ $food->image_url }}" alt="">
+        <p class="food-name">{{ $food->name }}</p>
+        <p class="food-price">{{ $food->price }}</p>
+        <button class="btn-remove-cart">Remove from Cart</button>
+    </div>
+@endforeach
+
+<br> <br>
+<span id="totalPrice">{{ $pricing['total_price'] }}</span> - Total Price <br>
+<span id="deliveryFee">{{ $pricing['delivery_fee'] }}</span> - Delivery Fee  <br>
+<span id="gstPercentage">{{ $pricing['gst_percentage'] }}</span> - Gst Percentage  <br>
+<span id="gst">{{ $pricing['gst'] }}</span> - Gst  <br>
+<span id="totalPayable">{{ $pricing['total_payable'] }}</span> - total_payable  <br>
 
 
-    </head>
-    <body class="antialiased">
+<script>
 
-        <ul>
-            <li>
-                <a href="{{ route('auth.change-password-view') }}">Change Password</a>
-            </li>
-            <li>
-                <a href="{{ route('search') }}">search</a>
-            </li>
-            <li>
-                <a href="{{ route('home') }}">home</a>
-            </li>
-            <li>
-                <a href="{{ route('auth.edit-account-view') }}">Edit Account</a>
-            </li>
-            <li>
-                <a href="{{ route('checkout') }}">checkout</a>
-            </li>
-            <li>
-                <a href="{{ route('cart') }}">cart</a>
-            </li>
-            <li>
-                <form action="{{ route('auth.logout') }}" method="post">
-                    @csrf
-                    <button type="submit">Logout</button>
-                </form>
-            </li>
-        </ul>
+    document.querySelectorAll('.food').forEach(foodEl => {
 
-        <h1>cart page</h1>
-        @foreach ($foods as $food)
-            <div class="food">
-                <p class="food-id" style="display: none">{{ $food->id }}</p>
-                <div class="qty">
-                    <button class="qty-minus">-</button>
-                    <p class="qty-count">{{ $food->qty }}</p>
-                    <button class="qty-plus">+</button>
-                </div>
-                <img src="{{ $food->image_url }}" alt="">
-                <p class="food-name">{{ $food->name }}</p>
-                <p class="food-price">{{ $food->price }}</p>
-                <button class="remove_to_cart">Remove from Cart</button>
-            </div>
-        @endforeach
-    </body>
+        foodEl.querySelector('.qty-minus').onclick = async event => {
+            // access required elements
+            const idEl = foodEl.querySelector('.food-id')
+            const priceEl = foodEl.querySelector('.food-price')
+            const qtyEl = foodEl.querySelector('.qty-count')
+            const totalPriceEl = document.querySelector('#totalPrice')
+            const gstPercentageEl = document.querySelector('#gstPercentage')
+            const gstEl = document.querySelector('#gst')
+            const deliveryFeeEl = document.querySelector('#deliveryFee')
+            const totalPayableEl = document.querySelector('#totalPayable')
 
-    <script>
-        document.querySelectorAll('.food').forEach(foodEl => {
-            const qtyPlusEl = foodEl.querySelector('.qty-plus')
-            const qtyMinusEl = foodEl.querySelector('.qty-minus')
-            const btnRemoveEl = foodEl.querySelector('.remove_to_cart')
+            // retrive required data
+            let id = Number(idEl.innerHTML)
+            let price = Number(priceEl.innerHTML)
+            let qty = Number(qtyEl.innerHTML)
+            let totalPrice = Number(totalPriceEl.innerHTML)
+            let gst = Number(gstEl.innerHTML)
+            let gstPercentage = Number(gstPercentageEl.innerHTML)
+            let deliveryFee = Number(deliveryFeeEl.innerHTML)
 
-            btnRemoveEl.onclick = e => {
-                const idEl = foodEl.querySelector('.food-id')
-                const id = idEl.innerHTML
+            // perform validation on data
+            if(qty == 1) return
 
-                fetch('{{ route('cart.remove') }}', {
-                    method: 'post',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id
-                    })
+            // make api call
+            await fetch('{{ route('cart.add') }}', {
+                method: 'post',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    id,
+                    qty: qty - 1
                 })
-                .then(async (response) => {
-                    foodEl.remove()
-                })
-                .catch((error) => {
-                    console.log(error);
-                })
-                .finally(() => {
-                    e.target.disabled = false
-                })
-            }
+            })
 
-            qtyPlusEl.onclick = e => {
-                const qtyCountEl = foodEl.querySelector('.qty-count')
-                const idEl = foodEl.querySelector('.food-id')
-                const qtyCount = qtyCountEl.innerHTML
-                const id = idEl.innerHTML
+            // update data 
+            qty = qty - 1
+            totalPrice = totalPrice - price 
+            gst = Math.round(totalPrice * (gstPercentage / 100))
+            totalPayable = totalPrice + gst + deliveryFee
 
-                const newQty = Number(qtyCount) + 1
+            // update view with new data
+            totalPriceEl.innerHTML = totalPrice
+            gstEl.innerHTML = gst 
+            qtyEl.innerHTML = qty
+            totalPayableEl.innerHTML= totalPayable
+        }  
 
-                fetch('{{ route('cart.add') }}', {
-                    method: 'post',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id,
-                        qty: newQty
-                    })
-                })
-                .then(async (response) => {
-                    console.log(await response.json());
-                })
-                .catch((error) => {
-                    console.log('error');
-                })
-                .finally(() => {
-                    e.target.disabled = false
-                    qtyCountEl.innerHTML = newQty
-                })
-            }
+        foodEl.querySelector('.qty-plus').onclick = async event => {
 
-            qtyMinusEl.onclick = e => {
-                const qtyCountEl = foodEl.querySelector('.qty-count')
-                const idEl = foodEl.querySelector('.food-id')
-                const qtyCount = qtyCountEl.innerHTML
-                const id = idEl.innerHTML
-                if(qtyCount == 1) return
+            // access required elements
+            const idEl = foodEl.querySelector('.food-id')
+            const priceEl = foodEl.querySelector('.food-price')
+            const qtyEl = foodEl.querySelector('.qty-count')
+            const totalPriceEl = document.querySelector('#totalPrice')
+            const gstPercentageEl = document.querySelector('#gstPercentage')
+            const gstEl = document.querySelector('#gst')
+            const deliveryFeeEl = document.querySelector('#deliveryFee')
+            const totalPayableEl = document.querySelector('#totalPayable')
 
-                const newQty = Number(qtyCount) - 1
+            // retrive required data
+            let id = Number(idEl.innerHTML)
+            let price = Number(priceEl.innerHTML)
+            let qty = Number(qtyEl.innerHTML)
+            let totalPrice = Number(totalPriceEl.innerHTML)
+            let gst = Number(gstEl.innerHTML)
+            let gstPercentage = Number(gstPercentageEl.innerHTML)
+            let deliveryFee = Number(deliveryFeeEl.innerHTML)
 
-                fetch('{{ route('cart.add') }}', {
-                    method: 'post',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id,
-                        qty: newQty
-                    })
+            // make api call
+            await fetch('{{ route('cart.add') }}', {
+                method: 'post',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    id,
+                    qty: qty + 1
                 })
-                .then(async (response) => {
-                    console.log(await response.json());
-                })
-                .catch((error) => {
-                    console.log('error');
-                })
-                .finally(() => {
-                    e.target.disabled = false
-                    qtyCountEl.innerHTML = newQty
-                })
-            }
-        })
-        document.querySelectorAll('.food').forEach(foodEl => {
-            const qtyPlusEl = foodEl.querySelector('.qty-plus')
-            const qtyMinusEl = foodEl.querySelector('.qty-minus')
+            })
 
-            qtyPlusEl.onclick = e => {
-                const qtyCountEl = foodEl.querySelector('.qty-count')
-                const idEl = foodEl.querySelector('.food-id')
-                const qtyCount = qtyCountEl.innerHTML
-                const id = idEl.innerHTML
+            // update data 
+            qty = qty + 1
+            totalPrice = totalPrice + price 
+            gst = Math.round(totalPrice * (gstPercentage / 100))
+            totalPayable = totalPrice + gst + deliveryFee
 
-                const newQty = Number(qtyCount) + 1
+            // update view with new data
+            totalPriceEl.innerHTML = totalPrice
+            gstEl.innerHTML = gst 
+            qtyEl.innerHTML = qty
+            totalPayableEl.innerHTML= totalPayable
+        } 
 
-                fetch('{{ route('cart.add') }}', {
-                    method: 'post',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id,
-                        qty: newQty
-                    })
-                })
-                .then(async (response) => {
-                    console.log(await response.json());
-                })
-                .catch((error) => {
-                    console.log('error');
-                })
-                .finally(() => {
-                    e.target.disabled = false
-                    qtyCountEl.innerHTML = newQty
-                })
-            }
+        foodEl.querySelector('.btn-remove-cart').onclick = async event => {
 
-            qtyMinusEl.onclick = e => {
-                const qtyCountEl = foodEl.querySelector('.qty-count')
-                const idEl = foodEl.querySelector('.food-id')
-                const qtyCount = qtyCountEl.innerHTML
-                const id = idEl.innerHTML
-                if(qtyCount == 1) return
+            // access required elements
+            const idEl = foodEl.querySelector('.food-id')
+            const priceEl = foodEl.querySelector('.food-price')
+            const qtyEl = foodEl.querySelector('.qty-count')
+            const totalPriceEl = document.querySelector('#totalPrice')
+            const gstPercentageEl = document.querySelector('#gstPercentage')
+            const gstEl = document.querySelector('#gst')
+            const deliveryFeeEl = document.querySelector('#deliveryFee')
+            const totalPayableEl = document.querySelector('#totalPayable')
 
-                const newQty = Number(qtyCount) - 1
+            // retrive required data
+            let id = Number(idEl.innerHTML)
+            let price = Number(priceEl.innerHTML)
+            let qty = Number(qtyEl.innerHTML)
+            let totalPrice = Number(totalPriceEl.innerHTML)
+            let gst = Number(gstEl.innerHTML)
+            let gstPercentage = Number(gstPercentageEl.innerHTML)
+            let deliveryFee = Number(deliveryFeeEl.innerHTML)
 
-                fetch('{{ route('cart.add') }}', {
-                    method: 'post',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id,
-                        qty: newQty
-                    })
+            // make api call
+            await fetch('{{ route('cart.remove') }}', {
+                method: 'post',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    id
                 })
-                .then(async (response) => {
-                    console.log(await response.json());
-                })
-                .catch((error) => {
-                    console.log('error');
-                })
-                .finally(() => {
-                    e.target.disabled = false
-                    qtyCountEl.innerHTML = newQty
-                })
-            }
-        })
+            })
 
+            // update data 
+            totalPrice = totalPrice - (qty * price) 
+            gst = Math.round(totalPrice * (gstPercentage / 100))
+            totalPayable = totalPrice + gst + deliveryFee
 
-    </script>
-</html>
+            // update view with new data
+            foodEl.remove()
+            totalPriceEl.innerHTML = totalPrice
+            gstEl.innerHTML = gst 
+            totalPayableEl.innerHTML= totalPayable
+        }  
+    })
+
+</script>
+

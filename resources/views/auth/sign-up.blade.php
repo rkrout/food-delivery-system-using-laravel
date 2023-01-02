@@ -34,4 +34,6 @@
     </div>
 
     <button type="submit">Sign Up</button>
+
+    <a href="{{ route('auth.login-view') }}">login</a>
 </form>

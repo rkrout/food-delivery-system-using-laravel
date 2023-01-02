@@ -64,15 +64,24 @@ class CartController extends Controller
 
         $cart = $request->session()->has('cart') ? $request->session()->get('cart') : [];
 
+        $total_price = 0;
+
         for ($i=0; $i < count($cart); $i++) { 
             $food = Food::where('id', $cart[$i]['id'])->first();
             $food->qty = $cart[$i]['qty'];
+            $total_price += ($food->price * $cart[$i]['qty']);
             array_push($foods, $food);
         }
 
-        // dd($foods);
+        $setting = Setting::first();
 
-        return view('cart', ['foods' => $foods]);
+        return view('cart', ['foods' => $foods, 'pricing' => [
+            'total_price' => $total_price,
+            'delivery_fee' => $setting->delivery_fee,
+            'gst_percentage' => $setting->gst_percentage,
+            'gst' => $total_price * ($setting->gst_percentage / 100),
+            'total_payable' => $setting->delivery_fee + $total_price + ($total_price * ($setting->gst_percentage / 100))
+        ]]);
     }
     public function details(Request $request)
     {

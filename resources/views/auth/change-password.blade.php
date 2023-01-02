@@ -1,3 +1,5 @@
+@include('base')
+
 <form action="{{ route('auth.change-password') }}" method="post">
     @csrf
 

@@ -1,3 +1,5 @@
+@include('base')
+
 <form action="{{ route('auth.edit-account') }}" method="post">
     @csrf
 

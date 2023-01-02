@@ -1,3 +1,5 @@
+@include('base')
+
 <table style="border-collapse: separate">
     <thead>
         <tr>
