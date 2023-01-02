@@ -9,6 +9,9 @@ use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\DeliveryAgentController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\SettingController;
+Route::post('/admin/settings/update', [SettingController::class, 'update'])->name('admin.settings.update');
 
 /*
 |--------------------------------------------------------------------------
@@ -115,3 +118,11 @@ Route::post('/{user}/delete', [DeliveryAgentController::class, 'remove'])->name(
 });
 
 Route::get('/admin', [DashboardController::class, 'index'])->name('admin');
+Route::get('/admin/orders', [OrderController::class, 'index'])->name('admin.orders');
+Route::get('/admin/{order}/view', [OrderController::class, 'show'])->name('admin.orders.view');
+Route::post('/admin/{order}/update', [OrderController::class, 'update'])->name('admin.orders.update');
+
+
+
+Route::get('/admin/settings', [SettingController::class, 'index'])->name('admin.settings');
+Route::get('/admin/settings/show', [SettingController::class, 'show'])->name('admin.settings.show');
