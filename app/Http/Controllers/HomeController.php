@@ -23,6 +23,7 @@ class HomeController extends Controller
     public function search(Request  $request)
     {
         $foods = Food::where('name', 'like', '%' . $request->search . '%')->get();
+        $categories = Food::where('name', 'like', '%' . $request->search . '%')->get();
 
         session()->flashInput($request->input());
 

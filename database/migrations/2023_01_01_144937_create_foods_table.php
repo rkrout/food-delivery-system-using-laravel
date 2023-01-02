@@ -18,9 +18,10 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->integer('price');
             $table->boolean('is_featured')->default(true);
+            $table->boolean('is_vegan')->default(true);
             $table->string('image_url');
             $table->unsignedBigInteger('category_id');
-            $table->foreign('category_id')->references('id')->on('categories');
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

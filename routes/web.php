@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\FoodController;
+use App\Http\Controllers\Admin\SliderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,3 +61,45 @@ Route::get('/seed', [HomeController::class, 'seed']);
 Route::post('/orders/place', [CartController::class, 'place'])->name('orders.place');
 Route::get('/orders/show', [CartController::class, 'show'])->name('orders.show');
 Route::get('/orders/show/{order}', [CartController::class, 'orderdetails'])->name('orders.orderdetails');
+
+
+
+
+
+
+
+
+
+
+
+
+Route::prefix('admin/categories')->group(function(){
+
+    Route::get('/', [CategoryController::class, 'index'])->name('admin.categories');
+    Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('admin.categories.edit');
+    Route::view('/create', 'admin.create-category')->name('admin.categories.create');
+    Route::post('/store', [CategoryController::class, 'store'])->name('admin.categories.store');
+    Route::post('/{category}/update', [CategoryController::class, 'update'])->name('admin.categories.update');
+    Route::post('/{category}/delete', [CategoryController::class, 'remove'])->name('admin.categories.delete');
+
+
+});
+
+Route::prefix('admin/foods')->group(function(){
+
+Route::get('/', [FoodController::class, 'index'])->name('admin.foods');
+Route::get('/{food}/edit', [FoodController::class, 'edit'])->name('admin.foods.edit');
+Route::get('/create', [FoodController::class, 'create'])->name('admin.foods.create');
+Route::post('/store', [FoodController::class, 'store'])->name('admin.foods.store');
+Route::post('/{food}/update', [FoodController::class, 'update'])->name('admin.foods.update');
+Route::post('/{food}/delete', [FoodController::class, 'remove'])->name('admin.foods.delete');
+
+});
+Route::prefix('admin/sliders')->group(function(){
+
+Route::get('/', [SliderController::class, 'index'])->name('admin.sliders');
+Route::view('/create', 'admin.create-slider')->name('admin.sliders.create');
+Route::post('/store', [SliderController::class, 'store'])->name('admin.sliders.store');
+Route::post('/{slider}/delete', [SliderController::class, 'remove'])->name('admin.sliders.delete');
+
+});
