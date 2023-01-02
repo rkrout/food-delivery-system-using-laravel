@@ -7,6 +7,8 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\DeliveryAgentController;
+use App\Http\Controllers\Admin\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -103,3 +105,13 @@ Route::post('/store', [SliderController::class, 'store'])->name('admin.sliders.s
 Route::post('/{slider}/delete', [SliderController::class, 'remove'])->name('admin.sliders.delete');
 
 });
+Route::prefix('admin/delivery-agents')->group(function(){
+
+Route::get('/', [DeliveryAgentController::class, 'index'])->name('admin.delivery-agents');
+Route::view('/create', 'admin.create-delivery-agent')->name('admin.delivery-agents.create');
+Route::post('/store', [DeliveryAgentController::class, 'store'])->name('admin.delivery-agents.store');
+Route::post('/{user}/delete', [DeliveryAgentController::class, 'remove'])->name('admin.delivery-agents.delete');
+
+});
+
+Route::get('/admin', [DashboardController::class, 'index'])->name('admin');
