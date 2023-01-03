@@ -13,14 +13,42 @@ class FoodController extends Controller
 {
     public function index(Request $request)
     {
-        return view('admin.foods', [
-            'foods' => Food::join('categories', 'categories.id', 'foods.category_id')
-                ->select([
-                    'categories.name as category',
-                    'foods.*'
-                ])
-                ->paginate(2)
+        $foods = Food::join('categories', 'categories.id', 'foods.category_id')
+            ->select([
+                'categories.name as category',
+                'foods.*'
+            ])
+            ->paginate(2);
+
+        return view('admin.foods', ['foods' => $foods]);
+    }
+
+    public function create(Request $request, Food $food)
+    {
+        return view('admin.create-food', ['categories' => Category::all()]);
+    }
+
+    public function store(Request $request)
+    { 
+        $request->validate([
+            'name' => 'required|min:2|max:30|unique:foods,name',
+            'price' => 'required|integer',
+            'is_featured' => 'nullable|boolean',
+            'is_vegan' => 'nullable|boolean',
+            'category_id' => 'required|exists:categories,id',
+            'image' => 'required|image'
         ]);
+
+        $food = Food::create([
+            'name' => $request->name,
+            'price' => $request->price,
+            'is_featured' => $request->is_featured ? 1 : 0,
+            'is_vegan' => $request->is_vegan ? 1 : 0,
+            'category_id' => $request->category_id,
+            'image_url' => url('/storage') . '/' . $request->image->store('images/foods', 'public')
+        ]);
+
+        return redirect()->route('admin.foods')->with('success', 'Food created successfully');
     }
 
     public function edit(Request $request, Food $food)
@@ -30,13 +58,6 @@ class FoodController extends Controller
             'categories' => Category::all()
         ]);
     }
-    public function create(Request $request, Food $food)
-    {
-        return view('admin.create-food', [
-            'categories' => Category::all()
-        ]);
-    }
-
 
     public function update(Request $request, Food $food)
     {
@@ -61,32 +82,10 @@ class FoodController extends Controller
 
         $food->save();
 
-        return redirect()->route('admin.foods');
+        return redirect()->route('admin.foods')->with('success', 'Food updated successfully');
     }
 
-    public function store(Request $request)
-    { 
-        $request->validate([
-            'name' => 'required|min:2|max:30|unique:foods,name',
-            'price' => 'required|integer',
-            'is_featured' => 'nullable|boolean',
-            'is_vegan' => 'nullable|boolean',
-            'category_id' => 'required|exists:categories,id',
-            'image' => 'required|image'
-        ]);
-
-        $food = Food::create([
-            'name' => $request->name,
-            'price' => $request->price,
-            'is_featured' => $request->is_featured ? 1 : 0,
-            'is_vegan' => $request->is_vegan ? 1 : 0,
-            'category_id' => $request->category_id,
-            'image_url' => url('/storage') . '/' . $request->image->store('images/foods', 'public')
-        ]);
-
-        return redirect()->route('admin.foods');
-    }
-    public function remove(Request $request, Food $food)
+    public function delete(Request $request, Food $food)
     {
         $image_url = str_replace(url('/storage'), '', $food->image_url);
 
@@ -94,6 +93,6 @@ class FoodController extends Controller
 
         $food->delete();
 
-        return back();
+        return back()->with('success', 'Food deleted successfully');
     }
 }

@@ -1,6 +1,9 @@
 
 @include('admin.base')
 <table style="border-collapse: separate">
+    @if (session('success'))
+        <p>{{ session('success') }}</p>
+    @endif
     <thead>
         <tr>
             <th>delivery_fee</th>
@@ -17,4 +20,4 @@
         </tr>
     </tbody>
 </table>
-<a href="{{ route('admin.settings.show') }}">edit</a>
+<a href="{{ route('admin.settings.edit') }}">edit</a>

@@ -40,7 +40,7 @@
             // make ajax call
             event.target.disabled = true 
 
-            await fetch('{{ route('cart.add') }}', {
+            await fetch('{{ route('cart.create') }}', {
                 method: 'post',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',

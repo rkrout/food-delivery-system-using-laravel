@@ -11,24 +11,24 @@ use App\Models\Order;
 use App\Models\OrderDetails;
 use App\Models\OrderStatus;
 
-
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        return view('admin.orders', [
-            'orders' => Order::join('order_statuses', 'order_statuses.id', 'orders.order_status_id')
-                ->select([
-                    'orders.*',
-                    DB::raw('(orders.total_price + orders.delivery_fee + (orders.total_price * (orders.gst_percentage / 100))) as total_amount'),
-                    'order_statuses.name as status'
-                ])
-                ->addSelect([
-                    'total_items' => OrderDetails::whereColumn('order_id', 'orders.id')->selectRaw('count(order_details.id)')
-                ])
-                ->paginate(2)
-       ]);
+        $orders = Order::join('order_statuses', 'order_statuses.id', 'orders.order_status_id')
+            ->select([
+                'orders.*',
+                'order_statuses.name as status'
+            ])
+            ->selectRaw('(total_price + delivery_fee + (total_price * (gst_percentage / 100))) as total_amount')
+            ->addSelect([
+                'total_items' => OrderDetails::whereColumn('order_id', 'orders.id')->selectRaw('count(order_details.id)')
+            ])
+            ->paginate(2);
+
+        return view('admin.orders', ['orders' => $orders]);
     }
+
     public function show(Request $request, Order $order)
     {
         return view('admin.order-details', [
@@ -39,6 +39,7 @@ class OrderController extends Controller
             'statuses' => OrderStatus::all(),
        ]);
     }
+
     public function update(Request $request, Order $order)
     {
         $request->validate([
@@ -57,6 +58,6 @@ class OrderController extends Controller
 
         $order->save();
 
-        return redirect()->route('admin.orders');
+        return redirect()->route('admin.orders')->with('success', 'Order updated successfully');
     }
 }

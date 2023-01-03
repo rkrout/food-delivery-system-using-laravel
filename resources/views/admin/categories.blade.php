@@ -5,6 +5,7 @@
         <tr>
             <th>id</th>
             <th>name</th>
+            <th>image</th>
             <th>total_foods</th>
             <th>created_at</th>
             <th>updated_at</th>

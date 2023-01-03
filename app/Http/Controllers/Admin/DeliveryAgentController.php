@@ -6,25 +6,29 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use App\Models\Order;
 use Illuminate\Support\Facades\Storage;
 
 class DeliveryAgentController extends Controller
 {
     public function index(Request $request)
     {
-        return view('admin.delivery-agent', [
-            'delivery_agents' => User::where('is_delivery_agent', true)
-                ->select([
-                    'users.id',
-                    'users.name',
-                    'users.email',
-                    'users.created_at',
-                    'users.updated_at',
-                    DB::raw('(select count(orders.id) from orders where orders.delivery_agent_id = users.id) as total_delivery'),
-                ])
-                ->paginate(2)
-        ]);
+        $delivery_agents = User::where('is_delivery_agent', true)
+            ->select([
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.created_at',
+                'users.updated_at'
+            ])
+            ->addSelect([
+                'total_delivery' => Order::whereColumn('delivery_agent_id', 'users.id')->selectRaw('count(orders.id)')
+            ])
+            ->paginate(2);
+
+        return view('admin.delivery-agent', ['delivery_agents' => $delivery_agents]);
     }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -37,14 +41,15 @@ class DeliveryAgentController extends Controller
 
         $user->save();
 
-        return redirect()->route('admin.delivery-agents');
+        return redirect()->route('admin.delivery-agents')->with('success', 'Delivery agent created successfully');
     }
-    public function remove(Request $request, User $user)
+
+    public function delete(Request $request, User $user)
     {
         $user->is_delivery_agent = false;
 
         $user->save();
 
-        return back();
+        return back()->with('success', 'Delivery agent deleted successfully');
     }
 }

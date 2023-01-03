@@ -12,6 +12,7 @@ class SliderController extends Controller
     {
         return view('admin.sliders', ['sliders' => Slider::all()]);
     }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -22,11 +23,13 @@ class SliderController extends Controller
             'image_url' => url('/storage') . '/' . $request->image->store('images/sliders', 'public')
         ]);
 
-        return redirect()->route('admin.sliders');
+        return redirect()->route('admin.sliders')->with('success', 'Slider created successfully');
     }
-    public function remove(Request $request, Slider $slider)
+
+    public function delete(Request $request, Slider $slider)
     {
         $slider->delete();
-        return back();
+
+        return back()->with('success', 'Slider deleted successfully');
     }
 }

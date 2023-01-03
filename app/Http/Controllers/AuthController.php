@@ -35,18 +35,13 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
  
-        if (Auth::attempt($credentials)) {
-
-            $request->session()->regenerate();
- 
-            return redirect()->intended(route('home'));
+        if (!Auth::attempt($credentials)) {
+            return back()->withInput()->withErrors(['email' => 'The provided credentials do not match our records.']);
         }
  
-        return back()
-            ->withInput()
-            ->withErrors([
-                'email' => 'The provided credentials do not match our records.',
-            ]);
+        $request->session()->regenerate();
+ 
+        return redirect()->intended(route('home'));
     }
 
     public function changePassword(Request $request)
@@ -56,16 +51,15 @@ class AuthController extends Controller
             'new_password' => 'required|min:6|max:20|confirmed'
         ]);
 
-        if(Hash::check($request->old_password, $request->user()->password)) {
-
-            $request->user()->password = Hash::make($request->new_password);
-
-            $request->user()->save();
-
-            return back()->with(['success' => 'Password changed succesfully']);
+        if(!Hash::check($request->old_password, $request->user()->password)) {
+            return back()->with(['error' => 'Invalid old password']);
         }
+ 
+        $request->user()->password = Hash::make($request->new_password);
 
-        return back()->with(['error' => 'Invalid old password']);
+        $request->user()->save();
+
+        return back()->with(['success' => 'Password changed succesfully']);
     }
 
     public function editAccount(Request $request)

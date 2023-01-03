@@ -23,7 +23,7 @@
             <td>{{ $order->created_at }}</td>
             <td>{{ $order->updated_at }}</td>
             <td>
-                <a href="{{ route('admin.orders.view', ['order' => $order->id]) }}">view</a>
+                <a href="{{ route('admin.orders.show', ['order' => $order->id]) }}">view</a>
             </td>
         </tr>
         @endforeach

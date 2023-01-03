@@ -20,7 +20,7 @@
             <td>{{ $order->total_price }}</td>
             <td>{{ $order->status }}</td>
             <td>
-                <a href="{{ route('orders.orderdetails', ['order' => $order->id ]) }}">details</a>
+                <a href="{{ route('orders.show', ['order' => $order->id ]) }}">details</a>
             </td>
         </tr>
         @endforeach

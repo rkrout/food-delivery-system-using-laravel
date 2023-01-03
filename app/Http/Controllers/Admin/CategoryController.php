@@ -6,26 +6,41 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Category;
+use App\Models\Food;
 use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
     public function index(Request $request)
     {
-        return view('admin.categories', [
-            'categories' => Category::select([
-                    'categories.*',
-                    DB::raw('(select foods.id from foods where foods.category_id = categories.id) as total_foods'),
-                ])
-                ->paginate(2)
-        ]);
+        $categories = Category::addSelect([
+                'total_foods' => Food::whereColumn('category_id', 'categories.id')->selectRaw('count(foods.id)')
+            ])
+            ->paginate(2);
+
+        return view('admin.categories', ['categories' => $categories]);
     }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|min:2|max:30|unique:categories,name',
+            'image' => 'required|image'
+        ]);
+
+        Category::create([
+            'name' => $request->name,
+            'image_url' => url('/storage') . '/' . $request->image->store('images/categories', 'public')
+        ]);
+
+        return redirect()->route('admin.categories')->with('success', 'Category created successfully');
+    }
+
     public function edit(Request $request, Category $category)
     {
-        return view('admin.edit-category', [
-            'category' => $category
-        ]);
+        return view('admin.edit-category', ['category' => $category]);
     }
+
     public function update(Request $request, Category $category)
     {
         $request->validate([
@@ -41,23 +56,10 @@ class CategoryController extends Controller
 
         $category->save();
 
-        return redirect()->route('admin.categories');
+        return redirect()->route('admin.categories')->with('success', 'Category updated successfully');
     }
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|min:2|max:30|unique:categories,name',
-            'image' => 'required|image'
-        ]);
 
-        $category = Category::create([
-            'name' => $request->name,
-            'image_url' => url('/storage') . '/' . $request->image->store('images/categories', 'public')
-        ]);
-
-        return redirect()->route('admin.categories');
-    }
-    public function remove(Request $request, Category $category)
+    public function delete(Request $request, Category $category)
     {
         $image_url = str_replace(url('/storage'), '', $category->image_url);
 
@@ -65,6 +67,6 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return back();
+        return back()->with('success', 'Category deleted successfully');
     }
 }

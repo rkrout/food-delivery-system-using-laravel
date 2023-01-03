@@ -15,10 +15,10 @@
         <a href="{{ route('cart') }}">cart</a>
     </li>
     <li>
-        <a href="{{ route('checkout') }}">checkout</a>
+        <a href="{{ route('cart.checkout') }}">checkout</a>
     </li>
     <li>
-        <a href="{{ route('orders.show') }}">orders</a>
+        <a href="{{ route('orders') }}">orders</a>
     </li>
     <li>
         <form action="{{ route('auth.logout') }}" method="post">

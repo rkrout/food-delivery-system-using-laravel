@@ -53,7 +53,7 @@
             if(qty == 1) return
 
             // make api call
-            await fetch('{{ route('cart.add') }}', {
+            await fetch('{{ route('cart.create') }}', {
                 method: 'post',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -101,7 +101,7 @@
             let deliveryFee = Number(deliveryFeeEl.innerHTML)
 
             // make api call
-            await fetch('{{ route('cart.add') }}', {
+            await fetch('{{ route('cart.create') }}', {
                 method: 'post',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -149,7 +149,7 @@
             let deliveryFee = Number(deliveryFeeEl.innerHTML)
 
             // make api call
-            await fetch('{{ route('cart.remove') }}', {
+            await fetch('{{ route('cart.delete') }}', {
                 method: 'post',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
