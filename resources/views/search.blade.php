@@ -33,7 +33,7 @@
             const qty = qtyCountEl.innerHTML
             e.target.disabled = true 
 
-            fetch('{{ route('cart.add') }}', {
+            fetch('{{ route('cart.create') }}', {
                 method: 'post',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
