@@ -1,24 +1,20 @@
-@include('base')
+@extends('base')
 
-<form action="{{ route('search') }}" method="get">
-    <input type="search" name="search" value="{{ old('search') }}">
-    <button type="submit">submit</button>
+@section('content')
+<form action="{{ route('search') }}" method="get" class="mx-auto max-w-2xl border-2 border-gray-300 rounded-md shadow p-4 mt-8 mb-4 flex ">
+    <input type="search" class="flex-1 border-2 border-gray-300 rounded-md p-2 outline-none block 
+    w-full focus:border-orange-600 focus:ring-1 focus:ring-orange-600 rounded-r-none" name="search" value="{{ old('search') }}"
+    placeholder="Search here...">
+    <button type="submit" class="bg-gray-200 px-3 flex justify-center hover:bg-gray-300 transition-all duration-300 items-center border-l-0 border-2 border-gray-300">
+        <span class="material-symbols-outlined">search</span>
+    </button>
 </form>
-
+<h2 class="text-2xl font-bold text-orange-600 mt-8 mb-5 max-w-5xl mx-4 md:mx-auto">123 Food Found</h2>
+<div class="grid grid-cols-3 gap-4 max-w-5xl mx-auto mb-8">
 @foreach ($foods as $food)
-    <div class="food">
-        <p class="food-id" style="display: none">{{ $food->id }}</p>
-        <div class="qty">
-            <button class="qty-minus">-</button>
-            <p class="qty-count">1</p>
-            <button class="qty-plus">+</button>
-        </div>
-        <img src="{{ $food->image_url }}" alt="">
-        <p class="food-name">{{ $food->name }}</p>
-        <p class="food-price">{{ $food->price }}</p>
-        <button class="add_to_cart">Add To Cart</button>
-    </div>
+    <x-food :food="$food"/>
 @endforeach
+</div>
 
 <script>
     document.querySelectorAll('.food').forEach(foodEl => {
@@ -78,3 +74,5 @@
 
 </script>
 
+
+@endsection
