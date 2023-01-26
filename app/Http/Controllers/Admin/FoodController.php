@@ -24,7 +24,7 @@ class FoodController extends Controller
     }
 
     public function store(Request $request)
-    { 
+    {
         $request->validate([
             'name' => 'required|min:2|max:30|unique:foods,name',
             'price' => 'required|integer',
@@ -40,7 +40,7 @@ class FoodController extends Controller
             'is_featured' => $request->is_featured ? 1 : 0,
             'is_vegan' => $request->is_vegan ? 1 : 0,
             'category_id' => $request->category_id,
-            'image_url' => url('/storage') . '/' . $request->image->store('images/foods', 'public')
+            'image_url' => url('/uploads') . '/' . $request->image->store('images/foods', 'public')
         ]);
 
         return response()->json($food);
@@ -64,7 +64,7 @@ class FoodController extends Controller
         $food->category_id = $request->category_id;
 
         if($request->image) {
-            $food->image_url = url('/storage') . '/' . $request->image->store('images/foods', 'public');
+            $food->image_url = url('/uploads') . '/' . $request->image->store('images/foods', 'public');
         }
 
         $food->save();
@@ -74,7 +74,7 @@ class FoodController extends Controller
 
     public function delete(Request $request, Food $food)
     {
-        $image_url = str_replace(url('/storage'), '', $food->image_url);
+        $image_url = str_replace(url('/uploads'), '', $food->image_url);
 
         Storage::disk('public')->delete($image_url);
 

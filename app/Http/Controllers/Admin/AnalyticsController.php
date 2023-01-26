@@ -8,9 +8,11 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Category;
 use App\Models\Food;
 use App\Models\Order;
+use App\Models\User;
+use App\Models\PaymentDetails;
 use App\Models\Slider;
 
-class DashboardController extends Controller
+class AnalyticsController extends Controller
 {
     public function index(Request $request)
     {
@@ -20,9 +22,11 @@ class DashboardController extends Controller
             'total_sliders' => Slider::count(),
             'total_orders' => Order::count(),
             'total_placed_orders' => Order::where('status', 'Placed')->count(),
+            'total_preparing_orders' => Order::where('status', 'Preparing')->count(),
+            'total_customers' => User::count(),
             'total_delivered_orders' => Order::where('status', 'Delivered')->count(),
             'total_prepared_orders' => Order::where('status', 'Prepared')->count(),
-            'total_earned' => Order::sum(DB::raw('total_price + delivery_fee + (total_price * (gst_percentage / 100))'))
+            'total_earned' => PaymentDetails::sum(DB::raw('ROUND(food_price + delivery_fee + (food_price * (gst_percentage / 100)))'))
        ]);
     }
 }

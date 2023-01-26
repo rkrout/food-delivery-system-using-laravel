@@ -20,7 +20,7 @@ class SliderController extends Controller
         ]);
 
         $slider = Slider::create([
-            'image_url' => url('/storage') . '/' . $request->image->store('images/sliders', 'public')
+            'image_url' => url('/uploads') . '/' . $request->image->store('images/sliders', 'public')
         ]);
 
         return response()->json($slider);

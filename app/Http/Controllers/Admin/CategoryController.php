@@ -30,7 +30,7 @@ class CategoryController extends Controller
 
         $category = Category::create([
             'name' => $request->name,
-            'image_url' => url('/storage') . '/' . $request->image->store('images/categories', 'public')
+            'image_url' => url('/uploads') . '/' . $request->image->store('images/categories', 'public')
         ]);
 
         return response()->json($category);
@@ -46,7 +46,7 @@ class CategoryController extends Controller
         $category->name = $request->name;
 
         if($request->image) {
-            $category->image_url = url('/storage') . '/' . $request->image->store('images/categories', 'public');
+            $category->image_url = url('/uploads') . '/' . $request->image->store('images/categories', 'public');
         }
 
         $category->save();

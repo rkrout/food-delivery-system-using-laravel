@@ -22,7 +22,7 @@ class DeliveryAgentController extends Controller
                 'updated_at'
             ])
             ->addSelect([
-                'total_delivery' => Order::whereColumn('delivery_agent_id', 'users.id')->selectRaw('count(orders.id)')
+                'total_delivery_done' => Order::whereColumn('delivery_agent_id', 'users.id')->selectRaw('count(orders.id)')
             ])
             ->get();
 

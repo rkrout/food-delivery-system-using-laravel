@@ -13,7 +13,7 @@ use App\Http\Controllers\Admin\FoodController as AdminFoodController;
 use App\Http\Controllers\Admin\SliderController as AdminSliderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DeliveryAgentController;
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\SettingController;
 
@@ -86,7 +86,7 @@ Route::middleware('auth:api')->group(function(){
 
 Route::prefix('admin')->middleware(['auth:api', 'admin'])->group(function(){
 
-    Route::get('/', [DashboardController::class, 'index']);
+    Route::get('/analytics', [AnalyticsController::class, 'index']);
 
     Route::get('/customers', [CustomerController::class, 'index']);
 
