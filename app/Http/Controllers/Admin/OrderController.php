@@ -8,35 +8,35 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\Order;
-use App\Models\OrderDetails;
+use App\Models\OrderedFood;
 use App\Models\OrderStatus;
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $orders = Order::join('order_statuses', 'order_statuses.id', 'orders.order_status_id')
+        $orders = Order::join('payment_details', 'payment_details.order_id', 'orders.id')
             ->select([
-                'orders.*',
-                'order_statuses.name as status'
+                'orders.id',
+                'orders.status',
+                'orders.created_at',
+                'orders.updated_at',
             ])
-            ->selectRaw('(total_price + delivery_fee + (total_price * (gst_percentage / 100))) as total_amount')
+            ->selectRaw('ROUND(food_price + delivery_fee + (food_price * (gst_percentage / 100))) AS total_amount')
             ->addSelect([
-                'total_items' => OrderDetails::whereColumn('order_id', 'orders.id')->selectRaw('count(order_details.id)')
+                'total_items' => OrderedFood::whereColumn('order_id', 'orders.id')->selectRaw('count(*)')
             ])
-            ->paginate(2);
+            ->get();
 
-        return view('admin.orders', ['orders' => $orders]);
+        return response()->json($orders);
     }
 
     public function show(Request $request, Order $order)
     {
-        return view('admin.order-details', [
+        return response()->json([
             'order' => $order,
-            'details' => $order->details()->get(),
-            'address' => $order->deliveryAdress()->first(),
-            'delivery_agents' => User::where('is_delivery_agent', true)->get(),
-            'statuses' => OrderStatus::all(),
+            'foods' => $order->foods()->get(),
+            'deliveryAddress' => $order->deliveryAddress()->first()
        ]);
     }
 
@@ -44,20 +44,18 @@ class OrderController extends Controller
     {
         $request->validate([
             'delivery_agent_id' => 'required|exists:users,id',
-            'order_status_id' => 'required|exists:order_statuses,id',
+            'status' => 'required',
         ]);
 
         if(!User::where('is_delivery_agent', true)->where('id', $request->delivery_agent_id)->exists()){
-            return back()->withValidationError([
-                'delivery_agent_id' => 'Invalid delivery agent'
-            ]);
+            abort(403);
         }
 
         $order->delivery_agent_id = $request->delivery_agent_id;
-        $order->order_status_id = $request->order_status_id;
+        $order->status = $request->status;
 
         $order->save();
 
-        return redirect()->route('admin.orders')->with('success', 'Order updated successfully');
+        return response()->json($order);
     }
 }

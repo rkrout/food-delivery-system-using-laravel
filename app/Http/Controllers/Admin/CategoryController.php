@@ -16,9 +16,9 @@ class CategoryController extends Controller
         $categories = Category::addSelect([
                 'total_foods' => Food::whereColumn('category_id', 'categories.id')->selectRaw('count(foods.id)')
             ])
-            ->paginate(2);
+            ->get();
 
-        return view('admin.categories', ['categories' => $categories]);
+        return response()->json($categories);
     }
 
     public function store(Request $request)
@@ -28,17 +28,12 @@ class CategoryController extends Controller
             'image' => 'required|image'
         ]);
 
-        Category::create([
+        $category = Category::create([
             'name' => $request->name,
             'image_url' => url('/storage') . '/' . $request->image->store('images/categories', 'public')
         ]);
 
-        return redirect()->route('admin.categories')->with('success', 'Category created successfully');
-    }
-
-    public function edit(Request $request, Category $category)
-    {
-        return view('admin.edit-category', ['category' => $category]);
+        return response()->json($category);
     }
 
     public function update(Request $request, Category $category)
@@ -56,7 +51,7 @@ class CategoryController extends Controller
 
         $category->save();
 
-        return redirect()->route('admin.categories')->with('success', 'Category updated successfully');
+        return response()->json($category);
     }
 
     public function delete(Request $request, Category $category)
@@ -67,6 +62,6 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return back()->with('success', 'Category deleted successfully');
+        return response()->json($category);
     }
 }

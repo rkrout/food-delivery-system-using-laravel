@@ -15,18 +15,14 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->integer('delivery_fee');
-            $table->integer('gst_percentage');
-            $table->integer('total_price');
-
-            $table->unsignedBigInteger('order_status_id');
-            $table->foreign('order_status_id')->references('id')->on('order_statuses');
+            $table->string('status');
 
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
 
             $table->unsignedBigInteger('delivery_agent_id')->nullable();
             $table->foreign('delivery_agent_id')->references('id')->on('users');
+            
             $table->timestamps();
         });
     }

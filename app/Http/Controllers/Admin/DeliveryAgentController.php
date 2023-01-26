@@ -15,18 +15,18 @@ class DeliveryAgentController extends Controller
     {
         $delivery_agents = User::where('is_delivery_agent', true)
             ->select([
-                'users.id',
-                'users.name',
-                'users.email',
-                'users.created_at',
-                'users.updated_at'
+                'id',
+                'name',
+                'email',
+                'created_at',
+                'updated_at'
             ])
             ->addSelect([
                 'total_delivery' => Order::whereColumn('delivery_agent_id', 'users.id')->selectRaw('count(orders.id)')
             ])
-            ->paginate(2);
+            ->get();
 
-        return view('admin.delivery-agent', ['delivery_agents' => $delivery_agents]);
+        return response()->json($delivery_agents);
     }
 
     public function store(Request $request)
@@ -41,7 +41,7 @@ class DeliveryAgentController extends Controller
 
         $user->save();
 
-        return redirect()->route('admin.delivery-agents')->with('success', 'Delivery agent created successfully');
+        return response()->json($user);
     }
 
     public function delete(Request $request, User $user)
@@ -50,6 +50,6 @@ class DeliveryAgentController extends Controller
 
         $user->save();
 
-        return back()->with('success', 'Delivery agent deleted successfully');
+        return response()->json($user);
     }
 }

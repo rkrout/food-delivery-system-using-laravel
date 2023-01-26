@@ -10,7 +10,7 @@ class SliderController extends Controller
 {
     public function index(Request $request)
     {
-        return view('admin.sliders', ['sliders' => Slider::all()]);
+        return response()->json(Slider::all());
     }
 
     public function store(Request $request)
@@ -19,17 +19,17 @@ class SliderController extends Controller
             'image' => 'required|image'
         ]);
 
-        Slider::create([
+        $slider = Slider::create([
             'image_url' => url('/storage') . '/' . $request->image->store('images/sliders', 'public')
         ]);
 
-        return redirect()->route('admin.sliders')->with('success', 'Slider created successfully');
+        return response()->json($slider);
     }
 
     public function delete(Request $request, Slider $slider)
     {
         $slider->delete();
 
-        return back()->with('success', 'Slider deleted successfully');
+        return response()->json($slider);
     }
 }

@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\OrderDetails;
-use App\Models\DeliveryAdress;
+use App\Models\OrderedFood;
+use App\Models\DeliveryAddress;
+use App\Models\paymentDetails;
 
 class Order extends Model
 {
@@ -15,16 +16,22 @@ class Order extends Model
         'total_price',
         'delivery_fee',
         'gst_percentage',
-        'order_status_id',
+        'status',
         'user_id'
     ];
 
-    public function details()
+    public function foods()
     {
-        return $this->hasMany(OrderDetails::class);
+        return $this->hasMany(OrderedFood::class);
     }
-    public function deliveryAdress()
+    
+    public function deliveryAddress()
     {
-        return $this->hasOne(DeliveryAdress::class);
+        return $this->hasOne(DeliveryAddress::class);
+    }
+
+    public function paymentDetails()
+    {
+        return $this->hasOne(PaymentDetails::class);
     }
 }

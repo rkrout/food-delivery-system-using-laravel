@@ -18,14 +18,9 @@ class FoodController extends Controller
                 'categories.name as category',
                 'foods.*'
             ])
-            ->paginate(2);
+            ->get();
 
-        return view('admin.foods', ['foods' => $foods]);
-    }
-
-    public function create(Request $request, Food $food)
-    {
-        return view('admin.create-food', ['categories' => Category::all()]);
+        return response()->json($foods);
     }
 
     public function store(Request $request)
@@ -48,15 +43,7 @@ class FoodController extends Controller
             'image_url' => url('/storage') . '/' . $request->image->store('images/foods', 'public')
         ]);
 
-        return redirect()->route('admin.foods')->with('success', 'Food created successfully');
-    }
-
-    public function edit(Request $request, Food $food)
-    {
-        return view('admin.edit-food', [
-            'food' => $food,
-            'categories' => Category::all()
-        ]);
+        return response()->json($food);
     }
 
     public function update(Request $request, Food $food)
@@ -82,7 +69,7 @@ class FoodController extends Controller
 
         $food->save();
 
-        return redirect()->route('admin.foods')->with('success', 'Food updated successfully');
+        return response()->json($food);
     }
 
     public function delete(Request $request, Food $food)
@@ -93,6 +80,6 @@ class FoodController extends Controller
 
         $food->delete();
 
-        return back()->with('success', 'Food deleted successfully');
+        return response()->json($food);
     }
 }

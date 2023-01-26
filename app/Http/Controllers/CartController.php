@@ -3,121 +3,93 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Food;
-use App\Models\Order;
-use App\Models\OrderDetails;
 use App\Models\Setting;
+use App\Models\Cart;
 
 class CartController extends Controller
 {
     public function index(Request $request)
     {
-        $foods = [];
+        $cart = $request->user()
+            ->cart()
+            ->join('foods', 'foods.id', 'cart.food_id')
+            ->select(
+                'cart.id',
+                'foods.name',
+                'foods.price',
+                'foods.image_url',
+                'cart.qty'
+            )
+            ->get();
 
-        $cart = $request->session()->has('cart') ? $request->session()->get('cart') : [];
+        return response()->json($cart);
+    }
 
-        $total_price = 0;
+    public function store(Request $request)
+    {
+        $request->validate([
+            'food_id' => 'required|exists:foods,id',
+            'qty' => 'required|integer'
+        ]);
 
-        for ($i = 0; $i < count($cart); $i++) { 
+        $cartItem = $request->user()->cart()->where('food_id', $request->food_id)->first();
+
+        if($cartItem) {
+
+            $cartItem->qty = $request->qty;
+
+            $cartItem->save();
+
+            return response()->json($cartItem);
+
+        } else {
+
+            $cartItem = $request->user()->cart()->create([
+                'food_id' => $request->food_id,
+                'qty' => $request->qty
+            ]);
+
+            return response()->json($cartItem);
+        }
+    }
+
+    public function delete(Request $request, Cart $cart)
+    {
+        if($cart->user_id != $request->user()->id) {
+            abort(403);
+        }
+
+        $cart->delete();
+
+        return response()->json($cart);
+    }
+
+    public function pricing(Request $request)
+    {
+        $cart = $request->user()
+            ->cart()
+            ->join('foods', 'foods.id', 'cart.food_id')
+            ->get();
+
+        $foodPrice = 0;
+
+        foreach ($cart as $cartItem) {
             
-            $food = Food::where('id', $cart[$i]['id'])->first();
-
-            $food->qty = $cart[$i]['qty'];
-
-            $total_price += ($food->price * $cart[$i]['qty']);
-
-            array_push($foods, $food);
+            $foodPrice += $cartItem->price * $cartItem->qty;
         }
 
         $setting = Setting::first();
 
-        return view('cart', ['foods' => $foods, 'pricing' => [
-            'total_price' => $total_price,
+        $gstAmount = round($foodPrice * ($setting->gst_percentage / 100));
+
+        $totalAmount = $foodPrice + $gstAmount + $setting->deliveryFee;
+
+        return response()->json([
+            'food_price' => $foodPrice,
             'delivery_fee' => $setting->delivery_fee,
             'gst_percentage' => $setting->gst_percentage,
-            'gst' => $total_price * ($setting->gst_percentage / 100),
-            'total_payable' => $setting->delivery_fee + $total_price + ($total_price * ($setting->gst_percentage / 100))
-        ]]);
-    }
-
-    public function create(Request $request)
-    {
-        $request->validate([
-            'id' => 'required|exists:foods,id'
-        ]);
-
-        $cart = $request->session()->has('cart') ? $request->session()->get('cart') : [];
-
-        $found  = false;
-
-        for ($i = 0; $i < count($cart); $i++) { 
-
-            if($cart[$i]['id'] == $request->id) {
-
-                $cart[$i]['qty'] = $request->qty;
-
-                $found = true;
-            }
-        }
-
-        if($found){
-
-            $request->session()->put('cart', $cart);
-
-            return response()->json(['message' => 'Food updated']);
-        }
-
-        array_push($cart, ['id' => $request->id, 'qty' => $request->qty]);
-
-        $request->session()->put('cart', $cart);
-
-        return response()->json(['message' => 'Food added to cart'], 201);
-    }
-
-    public function delete(Request $request)
-    {
-        $request->validate([
-            'id' => 'required|exists:foods,id'
-        ]);
-
-        $cart = $request->session()->has('cart') ? $request->session()->get('cart') : [];
-
-        $new_cart  = [];
-
-        for ($i=0; $i < count($cart); $i++) { 
-
-            if($cart[$i]['id'] != $request->id) {
-
-                array_push($new_cart, $cart[$i]);
-            }
-        }
-
-        $request->session()->put('cart', $new_cart);
-
-        return response()->json(['message' => 'Food deleted from cart']);
-    }
-
-    public function checkout(Request $request)
-    {
-        $cart = $request->session()->has('cart') ? $request->session()->get('cart') : [];
-
-        $total_price = 0;
-
-        for ($i = 0; $i < count($cart); $i++) { 
-
-            $food = Food::where('id', $cart[$i]['id'])->first();
-
-            $total_price += ($food->price * $cart[$i]['qty']);
-        }
-
-        $setting = Setting::first();
-
-        return view('checkout', [
-            'total_price' => $total_price,
-            'delivery_fee' => $setting->delivery_fee,
-            'gst_percentage' => $setting->gst_percentage,
-            'gst' => $total_price * ($setting->gst_percentage / 100),
-            'total_payable' => $setting->delivery_fee + $total_price + ($total_price * ($setting->gst_percentage / 100)),
+            'gst_amount' => $gstAmount,
+            'total_amount' => $totalAmount
         ]);
     }
 }

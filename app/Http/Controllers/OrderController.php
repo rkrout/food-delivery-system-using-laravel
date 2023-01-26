@@ -6,75 +6,88 @@ use Illuminate\Http\Request;
 use App\Models\Food;
 use App\Models\Order;
 use App\Models\Setting;
+use App\Models\DeliveryAddress;
+use App\Models\OrderedFood;
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $orders =  $request->user()->orders()
-            ->join('order_statuses', 'order_statuses.id', 'orders.order_status_id')
+        $orders =  $request->user()
+            ->orders()
+            ->join('payment_details', 'payment_details.order_id', 'orders.id')
             ->select([
-                'order_statuses.name as status',
-                'orders.*',
+                'orders.id',
+                'orders.status',
+                'orders.created_at',
+                'orders.updated_at',
+            ])
+            ->selectRaw('ROUND(food_price + delivery_fee + (food_price * gst_percentage / 100)) AS total_amount')
+            ->addSelect([
+                'total_foods' => OrderedFood::whereColumn('order_id', 'orders.id')->selectRaw('count(*)')
             ])
             ->get();
 
-        return view('orders', ['orders' => $orders]);
+        return response()->json($orders);
     }
 
     public function show(Request $request, Order $order)
     {
-        return view('order_details', [
+        return response()->json([
             'order' => $order,
-            'details' => $order->details()->get(),
-            'address' => $order->deliveryAdress()->first()
+            'foods' => $order->foods()->get(),
+            'deliveryAddress' => $order->deliveryAddress()->first()
         ]);
     }
 
     public function store(Request $request)
     {
-        $address = $request->validate([
+        $deliveryAddress = $request->validate([
             'name' => 'required|min:2|max:30',
             'mobile' => 'required|max:10',
             'street' => 'required|min:2|max:30',
-            'instruction' => 'required|min:2|max:50',
+            'instruction' => 'required|min:2|max:50'
         ]);
 
-        $cart = $request->session()->has('cart') ? $request->session()->get('cart') : [];
+        if(!$request->user()->cart()->exists()) {
+            abort(403);
+        }
 
-        $total_price = 0;
+        $cart = $request->user()
+            ->cart()
+            ->join('foods', 'foods.id', 'cart.food_id')
+            ->get();
 
-        for ($i = 0; $i < count($cart); $i++) { 
+        $foodPrice = 0;
+
+        foreach ($cart as $cartItem) {
             
-            $food = Food::where('id', $cart[$i]['id'])->first();
-
-            $total_price += ($food->price * $cart[$i]['qty']);
+            $foodPrice += $cartItem->price * $cartItem->qty;
         }
 
         $setting = Setting::first();
 
-        $order = $request->user()->orders()->create([
-            'total_price' => $total_price,
-            'delivery_fee' => $setting->delivery_fee,
-            'gst_percentage' => $setting->gst_percentage,
-            'order_status_id' => 1,
-        ]);
+        $order = $request->user()->orders()->create(['status' => 'Placed']);
 
-        $order->deliveryAdress()->create($address);
+        $order->deliveryAddress()->create($deliveryAddress);
 
-        for ($i = 0; $i < count($cart); $i++) { 
+        foreach ($cart as $cartItem) {
 
-            $food = Food::where('id', $cart[$i]['id'])->first();
-
-            $order->details()->create([
-                'food' => $food->name,
-                'qty' => $cart[$i]['qty'],
-                'price' => $food->price
+            $order->foods()->create([
+                'name' => $cartItem->name,
+                'qty' => $cartItem->qty,
+                'price' => $cartItem->price
             ]);
         }
 
-        $request->session()->put('cart', []);
+        $order->paymentDetails()->create([
+            'food_price' => $foodPrice,
+            'gst_percentage' => $setting->gst_percentage,
+            'delivery_fee' => $setting->delivery_fee
+        ]);
 
-        return redirect()->route('home')->with(['success' => 'Order placed successfully']);
+        $request->user()->cart()->delete();
+
+        return response()->json($order);
     }
 }

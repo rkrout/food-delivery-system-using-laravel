@@ -5,16 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Token;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function signUp(Request $request)
+    public function index(Request $request)
+    {
+        return response()->json($request->user());
+    }
+
+    public function register(Request $request)
     {
         $request->validate([
             'name' => 'required|min:2|max:30',
             'email' => 'required|email|max:30|unique:users,email',
-            'password' => 'required|min:6|max:20|confirmed'
+            'password' => 'required|min:6|max:20'
         ]);
 
         $user = User::create([
@@ -23,9 +29,12 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        Auth::login($user);
+        $token = Token::create([
+            'user_id' => $user->id,
+            'token' => bin2hex(random_bytes(32))
+        ]);
 
-        return redirect()->route('home');
+        return response()->json($token);
     }
 
     public function login(Request $request)
@@ -34,32 +43,34 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required'
         ]);
- 
-        if (!Auth::attempt($credentials)) {
-            return back()->withInput()->withErrors(['email' => 'The provided credentials do not match our records.']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if($user && Hash::check($request->password, $user->password)) {
+
+            $token = Token::create([
+                'user_id' => $user->id,
+                'token' => bin2hex(random_bytes(32))
+            ]);
+    
+            return response()->json($token);
         }
- 
-        $request->session()->regenerate();
- 
-        return redirect()->intended(route('home'));
+
+        return response()->json(['error' => 'Invalid email or password'], 422);
     }
 
     public function changePassword(Request $request)
     {
         $request->validate([
             'old_password' => 'required|current_password',
-            'new_password' => 'required|min:6|max:20|confirmed'
+            'new_password' => 'required|min:6|max:20'
         ]);
-
-        if(!Hash::check($request->old_password, $request->user()->password)) {
-            return back()->with(['error' => 'Invalid old password']);
-        }
  
         $request->user()->password = Hash::make($request->new_password);
 
         $request->user()->save();
 
-        return back()->with(['success' => 'Password changed succesfully']);
+        return response()->json(['success' => 'Password changed successfully']);
     }
 
     public function editAccount(Request $request)
@@ -76,17 +87,13 @@ class AuthController extends Controller
 
         $user->save();
 
-        return back()->with(['success' => 'Account edited successfully']);
+        return response()->json($user);
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        Token::where('token', $request->header('authorization'))->delete();
  
-        $request->session()->invalidate();
-     
-        $request->session()->regenerateToken();
-     
-        return redirect()->route('auth.login-view');
+        return response()->json(['success' => 'Logout successfully']);
     }
 }
