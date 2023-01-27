@@ -1,6 +1,7 @@
 import { ErrorMessage, Field, Form, Formik } from 'formik'
 import { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify"
+import Loader from '../components/Loader'
 import axios from "../utils/axios"
 import { getFormData } from '../utils/functions'
 import { foodSchema } from '../utils/validationSchemas'
@@ -45,7 +46,7 @@ export default function CreateFoodPage() {
     }, [])
 
     if (isLoading) {
-        return <p>Loading...</p>
+        return <Loader/>
     }
 
     return (

@@ -10,7 +10,9 @@ export default function Auth({ children }) {
 
     const fetchCurrentUser = async () => {
         const { data } = await axios.get("/auth")
-        setCurrentUser(data)
+   
+        setCurrentUser(data.user)
+        
         setIsLoading(false)
     }
 
@@ -21,7 +23,7 @@ export default function Auth({ children }) {
     if (isLoading) {
         return (
             <div className="h-screen">
-                <Loader/>
+                <Loader />
             </div>
         )
     }

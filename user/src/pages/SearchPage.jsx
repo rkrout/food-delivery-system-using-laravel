@@ -24,7 +24,7 @@ export default function SearchPage() {
             axios.get("/categories"),
             axios.get("/foods")
         ])
-
+console.log(foodsRes.data);
         setCategories(categoriesRes.data)
 
         setFoods(foodsRes.data)

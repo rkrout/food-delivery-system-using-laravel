@@ -12,8 +12,8 @@ export default function HomePage() {
 
     const fetchData = async () => {
         const [slidersRes, foodsRes] = await Promise.all([
-            axios.get("https://rajesh-social-network.000webhostapp.com/food/sliders.php"),
-            axios.get("https://rajesh-social-network.000webhostapp.com/food/foods.php")
+            axios.get("/sliders"),
+            axios.get("/foods")
         ])
 
         setSliders(slidersRes.data)

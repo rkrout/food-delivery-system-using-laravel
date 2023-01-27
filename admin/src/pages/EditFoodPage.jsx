@@ -2,6 +2,7 @@ import { ErrorMessage, Field, Form, Formik } from 'formik'
 import { useEffect, useState } from "react"
 import { useLocation, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
+import Loader from '../components/Loader'
 import axios from "../utils/axios"
 import { getFormData } from '../utils/functions'
 import { foodSchema } from '../utils/validationSchemas'
@@ -43,15 +44,15 @@ export default function EditFoodPage() {
     }, [])
 
     if (isLoading) {
-        return <p>Loading...</p>
+        return <Loader/>
     }
 
     return (
         <Formik
             initialValues={{
                 ...state,
-                is_vegan: state.is_vegan == 1,
-                is_featured: state.is_featured == 1,
+                isVegan: state.isVegan == 1,
+                isFeatured: state.isFeatured == 1,
             }}
             validationSchema={foodSchema}
             onSubmit={handleSubmit}
@@ -77,11 +78,22 @@ export default function EditFoodPage() {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="category_id" className="form-label">Category</label>
+                            <label htmlFor="price" className="form-label">Price</label>
                             <Field
-                                id="category_id"
+                                type="number"
+                                id="price"
                                 className="form-control"
-                                name="category_id"
+                                name="price"
+                            />
+                            <ErrorMessage component="p" name="price" className="form-error" />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="categoryId" className="form-label">Category</label>
+                            <Field
+                                id="categoryId"
+                                className="form-control"
+                                name="categoryId"
                                 as="select"
                             >
                                 <option></option>
@@ -89,7 +101,7 @@ export default function EditFoodPage() {
                                     <option value={category.id}>{category.name}</option>
                                 ))}
                             </Field>
-                            <ErrorMessage component="p" name="category_id" className="form-error" />
+                            <ErrorMessage component="p" name="categoryId" className="form-error" />
                         </div>
 
                         <div className="form-group">
@@ -107,21 +119,21 @@ export default function EditFoodPage() {
                         <div className="form-check">
                             <Field
                                 type="checkbox"
-                                id="is_vegan"
+                                id="isVegan"
                                 className="form-check-input"
-                                name="is_vegan"
+                                name="isVegan"
                             />
-                            <label htmlFor="is_vegan">Vegan</label>
+                            <label htmlFor="isVegan">Vegan</label>
                         </div>
 
                         <div className="form-check">
                             <Field
                                 type="checkbox"
-                                id="is_featured"
+                                id="isFeatured"
                                 className="form-check-input"
-                                name="is_featured"
+                                name="isFeatured"
                             />
-                            <label htmlFor="is_featured">Featured</label>
+                            <label htmlFor="isFeatured">Featured</label>
                         </div>
 
                         <button

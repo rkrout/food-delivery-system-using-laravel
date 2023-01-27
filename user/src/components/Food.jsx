@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { toast } from "react-toastify"
 import axios from "utils/axios"
+import { currency } from "utils/functions"
 import Button from "./Button"
 import QuantityControl from "./QtyControl"
 
@@ -29,7 +30,7 @@ export default function Food({ food }) {
 
             <p className="food-name">{food.name}</p>
 
-            <p className="food-price">Rs. {food.price}</p>
+            <p className="food-price">{currency.format(food.price)}</p>
 
             <div className="food-footer">
                 <QuantityControl quantity={qty} onChange={quantity => setQty(quantity)}/>

@@ -2,6 +2,8 @@ import Loader from "components/Loader"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import axios from "utils/axios"
+import moment from "moment/moment"
+import { currency } from "utils/functions"
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([])
@@ -48,14 +50,14 @@ export default function OrdersPage() {
                             {orders.map(order => (
                                 <tr key={order.id}>
                                     <td>{order.id}</td>
-                                    <td>Rs. {order.totalAmount}</td>
+                                    <td>{currency.format(order.totalAmount)}</td>
                                     <td>{order.totalFoods}</td>
                                     <td>
                                         <p className={`badge badge-success`}>
                                             {order.status}
                                         </p>
                                     </td>
-                                    <td>{order.createdAt}</td>
+                                    <td>{moment(order.createdAt).format("D-M-GG h:m A")}</td>
                                     <td>
                                         <Link to={`/auth/orders/${order.id}`} className="btn btn-primary btn-sm">
                                             View

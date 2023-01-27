@@ -109,7 +109,6 @@ export default function OrderDetailsPage() {
                             className="form-control"
                             value={deliveryAgentId}
                             onChange={event => setDeliveryAgentId(event.target.value)}
-                            required
                         >
                             <option></option>
                             {deliveryAgents.map(deliveryAgent => (

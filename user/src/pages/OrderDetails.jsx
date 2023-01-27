@@ -2,6 +2,7 @@ import Loader from "components/Loader"
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import axios from "utils/axios"
+import { currency } from "utils/functions"
 
 export default function OrderDetailsPage() {
     const { orderId } = useParams()
@@ -14,7 +15,7 @@ export default function OrderDetailsPage() {
 
     const fetchData = async () => {
         const { data } = await axios.get(`/orders/${orderId}`)
-
+console.log(data);
         setOrder(data)
 
         setIsFetching(false)
@@ -76,10 +77,10 @@ export default function OrderDetailsPage() {
                     </div>
 
                     <div className="card-body">
-                        <p>Food Price: Rs {paymentDetails.foodPrice}</p>
-                        <p className="mt-2">Delivery Fee: Rs {paymentDetails.deliveryFee}</p>
-                        <p className="mt-2">Gst ({paymentDetails.gstPercentage}%): Rs {paymentDetails.gstAmount}</p>
-                        <p className="mt-2">Total Amount: Rs {paymentDetails.totalAmount}</p>
+                        <p>Food Price: {currency.format(paymentDetails.foodPrice)}</p>
+                        <p className="mt-2">Delivery Fee: {currency.format(paymentDetails.deliveryFee)}</p>
+                        <p className="mt-2">Gst ({paymentDetails.gstPercentage}%): {currency.format(paymentDetails.gstAmount)}</p>
+                        <p className="mt-2">Total Amount: {currency.format(paymentDetails.totalAmount)}</p>
                     </div>
                 </div>
             </div>

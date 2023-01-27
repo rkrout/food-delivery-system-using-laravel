@@ -11,7 +11,7 @@ export default function Auth({ children }) {
 
     const fetchCurrentUser = async () => {
         const { data } = await axios.get(BASE_URL + "/auth")
-        setCurrentUser(data.isAdmin && data)
+        setCurrentUser(data.user)
         setIsLoading(false)
     }
 
@@ -21,6 +21,10 @@ export default function Auth({ children }) {
 
     if (isLoading) {
         return <Loader/>
+    }
+
+    if(!currentUser || !currentUser.isAdmin) {
+        return <p className="page-error">Please login to continue</p>
     }
 
     return (

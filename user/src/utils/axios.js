@@ -7,7 +7,17 @@ axios.interceptors.request.use(config => {
     if (localStorage.getItem("token")) {
         config.headers.authorization = localStorage.getItem("token")
     }
+
+    console.log(config);
+    if(config.method !== "get" && config.method !== "post") {
+
+        config.url = config.url.includes("?") ? `${config.url}&_method=${config.method}` : `${config.url}?_method=${config.method}`
+
+        config.method = "post"
+    }
+
     return config
+
 }, error => Promise.reject(error))
 
 axios.interceptors.response.use(response => response, error => {
@@ -15,6 +25,7 @@ axios.interceptors.response.use(response => response, error => {
         localStorage.removeItem("token")
         window.location.href = "/login"
     }
+
     return Promise.reject(error)
 })
 
