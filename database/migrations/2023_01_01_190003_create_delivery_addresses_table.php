@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('street');
             $table->string('instruction');
+            $table->string('landmark');
             $table->integer('mobile');
             $table->unsignedBigInteger('order_id');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade')->onUpdate('cascade');

@@ -46,7 +46,8 @@ class OrderController extends Controller
             'name' => 'required|min:2|max:30',
             'mobile' => 'required|max:10',
             'street' => 'required|min:2|max:30',
-            'instruction' => 'required|min:2|max:50'
+            'instruction' => 'required|min:2|max:50',
+            'landmark' => 'required|min:2|max:50'
         ]);
 
         if(!$request->user()->cart()->exists()) {

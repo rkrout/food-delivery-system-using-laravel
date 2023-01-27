@@ -36,6 +36,7 @@ class OrderController extends Controller
         return response()->json([
             'order' => $order,
             'foods' => $order->foods()->get(),
+            'paymentDetails' => $order->paymentDetails()->first(),
             'deliveryAddress' => $order->deliveryAddress()->first()
        ]);
     }

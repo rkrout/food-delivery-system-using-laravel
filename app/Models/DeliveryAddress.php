@@ -14,5 +14,6 @@ class DeliveryAddress extends Model
         'mobile',
         'street',
         'instruction',
+        'landmark',
     ];
 }
